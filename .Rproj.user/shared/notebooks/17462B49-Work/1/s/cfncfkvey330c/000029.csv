@@ -1,8 +1,9 @@
-"0","modmod <- brm(whole ~ site,
+"0","#model
+modmod <- brm(whole ~ site,
                   family=Gamma(link=""log""),
                   data=newest %>% filter(whole>0),
-                  prior=c(prior(normal(-1,0.001), class=""b""),
-                          prior(normal(0.1, 0.05), class=""Intercept"")),
+                  prior=c(prior(normal(0.7,0.3), class=""b""),
+                          prior(normal(-0.01, 0.05), class=""Intercept"")),
                   #sample_prior=""only"",
                   iter=1000, chains=1,
                   file=""modmod.rds"",
@@ -26,7 +27,7 @@
 "1",""
 "1"," FOR MODEL '"
 "1",""
-"1","dab295bdea242bf16c306523fe217e4c"
+"1","e658c55dd6aad1afd655be822d5f40ba"
 "1",""
 "1","' NOW (CHAIN "
 "1",""
@@ -151,19 +152,19 @@
 "1","Chain "
 "1","1"
 "1",": "
-"1"," Elapsed Time: 0.195 seconds (Warm-up)"
+"1"," Elapsed Time: 0.141 seconds (Warm-up)"
 "1","
 "
 "1","Chain "
 "1","1"
 "1",": "
-"1","               0.134 seconds (Sampling)"
+"1","               0.118 seconds (Sampling)"
 "1","
 "
 "1","Chain "
 "1","1"
 "1",": "
-"1","               0.329 seconds (Total)"
+"1","               0.259 seconds (Total)"
 "1","
 "
 "1","Chain "
@@ -172,22 +173,39 @@
 "1",""
 "1","
 "
-"2","Warning:"
-"2"," Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
-Running the chains for more iterations may help. See
-http://mc-stan.org/misc/warnings.html#bulk-ess
-"
-"0","plot(conditional_effects(modmod, points=T))"
 "2","
 "
 "2","==== C stack trace ===============================
 
-	(No symbol) [0x0x367f140]
+	(No symbol) [0x0x7126f190]
 	R_RunWeakRefFinalizer [0x0x6c83468f+383]
 	R_RunWeakRefFinalizer [0x0x6c834927+1047]
-	Rf_eval [0x0x6c7fccda+330]
+	R_initAssignSymbols [0x0x6c7f7f61+73617]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	Rf_eval [0x0x6c7fceac+796]
+	R_execMethod [0x0x6c8009c7+2791]
+	Rf_eval [0x0x6c7fd0f5+1381]
+	Rf_eval [0x0x6c7fd5c9+2617]
+	Rf_eval [0x0x6c7fd014+1156]
+	Rf_eval [0x0x6c7fd5c9+2617]
+	Rf_eval [0x0x6c7"
+"2","fda48+3768]
+	R_initAssignSymbols [0x0x6c7f2712+51010]
+	Rf_eval [0x0x6c7fcd01+369]
 	Rf_eval [0x0x6c7fd5c9+2617]
 	Rf_eval [0x0x6c7fda48+3768]
+	R_initAssignSymbols [0x0x6c7f2712+51010]"
+"2","
+	Rf_eval [0x0x6c7fcd01+369]
+	Rf_eval [0x0x6c7fd5c9+2617]
+	Rf_eval [0x0x6c7fda48+3768]
+	R_initAssignSymbols [0x0x6c7f2712+51010]
+	Rf_eval [0x0x6c7fcd01+369]
+	Rf_eval [0x0x6c7fd5c9+2617]
+	"
+"2","Rf_eval [0x0x6c7fda48+3768]
 	R_initAssignSymbols [0x0x6c7f2712+51010]
 	Rf_eval [0x0x6c7fcd01+369]
 	R_cmpfun1 [0x0x6c7fea17+1191]
@@ -195,57 +213,40 @@ http://mc-stan.org/misc/warnings.html#bulk-ess
 	R_initAssignSymbols [0x0x6c7f5064+61588]
 	Rf_eval [0x0x6c7fcd01+369]
 	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_apply"
-"2","Closure [0x0x6c7ffc7a+442]
-	R_initAssignSymbols [0x0x6c7f5064+61588]
-	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
 	Rf_applyClosure [0x0x6c7ffc7a+442]
 	R_initAssignSymbols [0x0x6c7f5064+61588]
 	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_applyClosure [0x0x6c7ffc7a+442]
-	R_has_methods_attached [0x0x6c83c868+920]
-	R_has_methods_attached [0x0x6c83d3d4+3844]
-	R_initAssignSymbols [0x0x6c7ed42b+29787]
-	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_apply"
-"2","Closure [0x0x6c7ffc7a+442]
-	R_initAssignSymbols [0x0x6c7f5064+61588]
-	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_applyClosure [0x0x6c7ffc7a+442]
-	R_has_methods_attached [0x0x6c83c868+920]
-	R_has_methods_attached [0x0x6c83d3d4+3844]
-	R_initAssignSymbols [0x0x6c7ed42b+29787]
-	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_applyClosure [0x0x6c7ffc7a+442]
-	R_initAssignSymbols [0x0x6c7f5064+61588]
-	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_apply"
-"2","Closure [0x0x6c7ffc7a+442]
-	R_has_methods_attached [0x0x6c83c868+920]
-	R_has_methods_attached [0x0x6c83d3d4+3844]
-	R_initAssignSymbols [0x0x6c7ed42b+29787]
-	Rf_eval [0x0x6c7fcd01+369]
-	R_cmpfun1 [0x0x6c7fea17+1191]
+	"
+"2","R_cmpfun1"
+"2"," [0x"
+"2","0x6c7fea17+1191]
 	Rf_applyClosure [0x0x6c7ffc7a+442]
 	R_initAssignSymbols [0x0x6c7f5064+61588]
 	Rf_eval [0x0x6c7fcd01+369]
 	R_cmpfun1 [0x0x6c7fea17+1191]
 	Rf_applyClosure [0x0x6c7ffc7a+442]
-	R_has_methods_attached [0x0x6c83c868+920]
-	R_has_methods_attached [0x0x6c83d3d4+3844]
-	R_initAssignSymbols [0x"
-"2","0x6c7ed42b+29787]
-	Rf_eval [0x0x6c7fcd01+369]
+	Rf_eval [0x0x6c7fceac+796]
+	R_execMethod [0x0x6c8009c7+2791]
+	Rf_eval [0x0x6c7fd0f5+1381]
 	R_cmpfun1 [0x0x6c7fea17+1191]
 	Rf_applyClosure [0x0x6c7ffc7a+442]
-	R_initAssignSymbols [0x0x6c7f5064+61588]
-	Rf_eval [0x0x6c7fcd01+369]
+	Rf_eval [0x0x6c7fceac+796]
+	R_execMethod [0x0x6c8009c7+2791]
+	Rf_eval [0x0x6c7fd0f5+1381]
 	R_cmpfun1 [0x0x6c7fea17+1191]
-	Rf_applyClosure [0x0x6c7ffc7a+442]
+"
+"2","	Rf_applyClosure [0x0x6c7ffc7a+442]
+	Rf_eval [0x0x6c7fceac+796]
+	R_execMethod [0x0x6c801f5a+8314]
+	Rf_eval [0x0x6c7fd0f5+1381]
+	R_execMethod [0x0x6c8009c7+2791]
+	Rf_eval [0x0x6c7fd0f5+"
+"2","1381"
+"2","]
+	Rf_eval [0x0x6c7fd0f5+1381]
+	Rf_eval [0x0x6c7fd0f5+1381]
+	R_execMethod [0x0x6c8009c7+2791]
+"
+"2","	Rf_eval [0x0x6c7fd0f5+1381]
+	R_cmpfun1 [0x0x6c7fea17+1191]
 "

@@ -1,0 +1,2 @@
+"0","site_diff %>% "
+"0","  summarize(higher=sum(yank1_yank2>0)/nrow(.))"
