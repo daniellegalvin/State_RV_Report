@@ -143,6 +143,10 @@ total_pos <- site_based_pos %>%
   mutate(total_state=sum(positive_status)) %>% 
   mutate(all_state=sum(singles))
 
+#Prevalence by site from scratch
+prev_site <- total_pos %>% 
+  group_by(site) %>% 
+  mutate(prevalence=((sum(positive_status)/(sum(singles)))*100))
 
 #Calculating the prevalence values by site  
 site_name <- data.frame(site=c("cold_brook", "cottonwood_springs", "lost_lake", "NAB_2", "yankton_1", "yankton_2", "acheson", "buffalo_lake", "gold_run_creek", "habeger", "horsethief", "iron_creek_lake", "long_lake", "mitchell_lake", "pettigrew", "roubaix_lake", "sylvan_lake"))
@@ -256,17 +260,17 @@ posts_site <- add_epred_draws(species_site_model, newdata=cond_data_site)
 
 #Plot looking at the average copies of ranavirus on the log scale based on species, colored by site
 species_site_plot <- posts_site %>% 
-  ggplot(aes(x=species, y=.epred, fill=site))+
+  ggplot(aes(x=site, y=.epred, fill=species))+
   geom_violin()+
-  geom_boxplot(width=0.1,aes(fill=site), position=position_dodge(width=0.9), outlier.size=0)+
-  geom_point(data=species_site_model$data, aes(y=virus, shape=species),
+  geom_boxplot(width=0.1,aes(fill=species), position=position_dodge(width=0.9), outlier.size=0)+
+  geom_point(data=species_site_model$data, aes(y=virus),
              position=position_dodge(width=0.9))+
 scale_y_log10()+
-  labs(y="Average Ranavirus Copies", x="Species")+
+  labs(y="Average Ranavirus Copies", x="Site")+
   theme(axis.text.x=element_text(size=8, angle=30, hjust=1))+
-  guides(fill=guide_legend(title="Site"), shape=guide_legend(title="Species"))
+  guides(fill=guide_legend(title="Species"))
 species_site_plot
-ggsave("species_site_interaction_plot.jpg", plot=species_site_plot,width=8, height=4, dpi=600)
+ggsave("site_species_interaction_plot.jpg", plot=species_site_plot,width=6, height=4, dpi=600)
 
 #Plot looking at the average copies of ranavirus on the log scale based on species
 species_plot <- posts_site %>% 
@@ -491,37 +495,71 @@ site_diff %>%
 site_diff %>% 
   summarize(higher=sum(NAB_cottonwood>0)/nrow(.))
 
+#Difference between species at Yankton 1 and Yankton 2
+site_based_diff <- easy_data %>% 
+  mutate(blanchardi_blairi_yank1=(acris_blanchardi_yankton_1-rana_blairi_yankton_1)) %>% 
+  mutate(woodhousii_blairi_yank2=(anaxyrus_woodhousii_yankton_2-rana_blairi_yankton_2)) %>% 
+  mutate(blanchardi_woodhousii_yank2=(anaxyrus_woodhousii_yankton_2-acris_blanchardi_yankton_2))
+
+#Calculating median difference in average ranavirus copies between species at yank1 and yank2
+site_based_diff %>% 
+  mean_qi(blanchardi_blairi_yank1)
+site_based_diff %>% 
+  mean_qi(woodhousii_blairi_yank2)
+site_based_diff %>% 
+  mean_qi(blanchardi_woodhousii_yank2)
+
+#Probability that the first is greater than the second
+site_based_diff %>% 
+  summarize(higher=(sum(blanchardi_blairi_yank1>0))/nrow(.))
+site_based_diff %>% 
+  summarize(higher=(sum(woodhousii_blairi_yank2>0))/nrow(.))
+site_based_diff %>% 
+  summarize(higher=(sum(blanchardi_woodhousii_yank2>0))/nrow(.))
+
+
 ```
 
 This is a model looking at ranavirus prevalence based on site.
 ```{r}
-#Adding 0.000001 to all average virus values so that I have no zero values and am able to use the Gamma distribution for my model
-newest <- prevalence_data_site %>% 
-  mutate(whole=(prevalence*100)) %>% 
-  select(site, whole)
-  
-get_prior(whole~site, data=newest, family=Gamma(link="log"))
+get_prior(prevalence~site, data=prev_site, family=Gamma(link="log"))
 
 #model
-modmod <- brm(whole ~ site,
+modmod <- brm(prevalence ~ site,
                   family=Gamma(link="log"),
-                  data=newest %>% filter(whole>0),
-                  prior=c(prior(normal(0.7,0.3), class="b"),
-                          prior(normal(-0.01, 0.05), class="Intercept")),
+                  data=prev_site %>% filter(prevalence>0),
+                  prior=c(prior(normal(3.5,2), class="b"),
+                          prior(normal(1,1), class="Intercept")),
                   #sample_prior="only",
                   iter=1000, chains=1,
                   file="modmod.rds",
                   file_refit="on_change")
 
-plot(conditional_effects(modmod, points=T))
+plot(conditional_effects(modmod))
 
 modmod <- update(modmod, iter=2000, chains=4)#update chains and iterations
 modmod#call the model to view stats
 
 saveRDS(modmod, "Models/modmod.rds")
 
+pp_check(modmod, type="stat_grouped", group="site")
 
+cond_data_prevsite <- distinct(modmod$data)
+posts_prevsite <- add_epred_draws(modmod, newdata=cond_data_prevsite)
 
+#Graphing the posterior predictions
+prev_site_plot <- posts_prevsite %>% 
+  ggplot(aes(x=site, y=.epred))+
+  # geom_violin()+
+  # geom_boxplot(width=0.1, position=position_dodge(width=0.9), outlier.size=0)+
+  geom_point(data=modmod$data, aes(y=prevalence),
+             position=position_dodge(width=0.9))+
+scale_y_log10()+
+  labs(y="Prevalence Rate", x="Site")+
+  theme(axis.text.x=element_text(size=8, angle=30, hjust=1))+
+  guides(fill=guide_legend(title="Site"))
+prev_site_plot
+ggsave("species_site_interaction_plot.jpg", plot=species_site_plot,width=8, height=4, dpi=600)
 
 ```
 

@@ -1,0 +1,4 @@
+"0","#Mean ranavirus copies for each species at each site"
+"0","summarize(posts_site, mean=mean(.epred))"
+"1","`summarise()` has grouped output by 'site', 'species'. You can override using the `.groups` argument.
+"
