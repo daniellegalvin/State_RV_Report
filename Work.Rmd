@@ -141,12 +141,31 @@ total_pos <- site_based_pos %>%
   mutate(total_individuals=sum(singles)) %>% 
   ungroup() %>% 
   mutate(total_state=sum(positive_status)) %>% 
-  mutate(all_state=sum(singles))
+  mutate(all_state=sum(singles)) %>% 
+  group_by(site) %>% 
+  mutate(site_totals=sum(singles)) %>% 
+  select(site, total_positive, site_totals)
 
 #Prevalence by site from scratch
 prev_site <- total_pos %>% 
   group_by(site) %>% 
   mutate(prevalence=((sum(positive_status)/(sum(singles)))*100))
+
+#Prevalence by species
+species_prev <- total_pos %>% 
+  group_by(species) %>% 
+  mutate(total_pos=(sum(positive_status))) %>% 
+  mutate(total_sampled=(sum(singles))) %>% 
+  mutate(species_prevalence=((sum(positive_status)/(sum(singles)))*100)) %>% 
+  select(species, total_pos, total_sampled, species_prevalence)
+
+#Average average rv copies by species
+datadata <- total_pos %>% 
+  filter(average_virus>0) %>% 
+  group_by(species) %>% 
+  mutate(average_load=(mean(average_virus))) %>% 
+  select(species, average_load)
+  
 
 #Calculating the prevalence values by site  
 site_name <- data.frame(site=c("cold_brook", "cottonwood_springs", "lost_lake", "NAB_2", "yankton_1", "yankton_2", "acheson", "buffalo_lake", "gold_run_creek", "habeger", "horsethief", "iron_creek_lake", "long_lake", "mitchell_lake", "pettigrew", "roubaix_lake", "sylvan_lake"))
