@@ -26,9 +26,10 @@ site_based_pos <- data %>%
   mutate(positive_status=case_when(result=="positive" ~ 1,
                             TRUE ~ 0))%>% 
   #filter(value_1>0) %>% 
-  select(sample_label, site, side_of_state, species, value_1, value_2, value_3) %>% 
+  select(sample_label, site, side_of_state, species, value_1, value_2, value_3, positive_status) %>% 
   group_by(sample_label) %>% 
   mutate(average_virus=mean(c(value_1, value_2, value_3))) %>% 
+  mutate(singles=1) %>% 
   view()
 
 #cold_brook_prevalence <- site_based_pos %>% 
@@ -55,10 +56,10 @@ site_based_pos <- data %>%
 #   mutate(total=sum(prevalence)) %>% 
 #   view()
 # 
-# yankton_2_prevalence <- site_based_pos %>% 
-#   filter(site=="yankton_2") %>% 
-#   summarize(prevalence=sum(average_virus>0)/nrow(.)) %>% 
-#   mutate(total=sum(prevalence)) %>% 
+# yankton_2_prevalence <- site_based_pos %>%
+#   filter(site=="yankton_2") %>%
+#   summarize(prevalence=sum(average_virus>0)/nrow(.)) %>%
+#   mutate(total=sum(prevalence)) %>%
 #   view()
 # 
 # lost_lake_prevalence <- site_based_pos %>% 
@@ -132,6 +133,15 @@ site_based_pos <- data %>%
 #   summarize(prevalence=sum(average_virus>0)/nrow(.)) %>% 
 #   mutate(total=sum(prevalence)) %>% 
 #   view()
+
+#Total positive individuals by site
+total_pos <- site_based_pos %>% 
+  group_by(site) %>% 
+  mutate(total_positive=sum(positive_status)) %>% 
+  mutate(total_individuals=sum(singles)) %>% 
+  ungroup() %>% 
+  mutate(total_state=sum(positive_status)) %>% 
+  mutate(all_state=sum(singles))
 
 
 #Calculating the prevalence values by site  
@@ -248,19 +258,41 @@ posts_site <- add_epred_draws(species_site_model, newdata=cond_data_site)
 species_site_plot <- posts_site %>% 
   ggplot(aes(x=species, y=.epred, fill=site))+
   geom_violin()+
-  geom_point(data=species_site_model$data, aes(y=virus),
+  geom_boxplot(width=0.1,aes(fill=site), position=position_dodge(width=0.9), outlier.size=0)+
+  geom_point(data=species_site_model$data, aes(y=virus, shape=species),
              position=position_dodge(width=0.9))+
-scale_y_log10()
+scale_y_log10()+
+  labs(y="Average Ranavirus Copies", x="Species")+
+  theme(axis.text.x=element_text(size=8, angle=30, hjust=1))+
+  guides(fill=guide_legend(title="Site"), shape=guide_legend(title="Species"))
 species_site_plot
+ggsave("species_site_interaction_plot.jpg", plot=species_site_plot,width=8, height=4, dpi=600)
 
 #Plot looking at the average copies of ranavirus on the log scale based on species
 species_plot <- posts_site %>% 
   ggplot(aes(x=species, y=.epred))+
-  geom_violin()+
+  geom_violin(fill='#A4A4A4')+
+  geom_boxplot(width=0.1, alpha=0.6, outlier.size=0)+
   geom_point(data=species_site_model$data, aes(y=virus),
              position=position_dodge(width=0.9))+
-  scale_y_log10()
+  scale_y_log10()+
+  labs(y="Average Ranavirus Copies", x="Species")+
+  theme(axis.text.x=element_text(angle=30, hjust=1))
 species_plot
+ggsave("species_plot.jpg", plot=species_plot, width=6, height=4, dpi=600)
+
+#Plot looking at the average copies of ranavirus on the log scale based on site
+site_plot <- posts_site %>% 
+  ggplot(aes(x=site, y=.epred))+
+  geom_violin(fill='#A4A4A4')+
+  geom_boxplot(width=0.1, alpha=0.6, outlier.size=0)+
+  geom_point(data=species_site_model$data, aes(y=virus),
+             position=position_dodge(width=0.9))+
+  scale_y_log10()+
+  labs(y="Average Ranavirus Copies", x="Site")+
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+site_plot
+ggsave("site_plot.jpg", plot=site_plot, width=6, height=4, dpi=600)
 
 #posterior predictive check graphs
 pp_check(species_site_model, type="stat_grouped", group="species")
@@ -290,6 +322,18 @@ easy_data <- posts_site %>%
               values_from=virus) %>% 
   view()
 
+#Medians with 95% CI values for each species (combining sites)
+easy_data %>% 
+  median_qi(rana_catesbeiana_cold_brook_lake)
+easy_data %>% 
+  median_qi(rana_pipiens_lost_lake)
+easy_data %>% 
+  median_qi(rana_blairi_yankton_1+rana_blairi_yankton_2)
+easy_data %>% 
+  median_qi(anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2)
+easy_data %>% 
+  median_qi(acris_blanchardi_yankton_1+acris_blanchardi_yankton_2)
+
 #Calculating the differences between species
 species_diff <- easy_data %>% 
   mutate(catesbeiana_woodhousii=(rana_catesbeiana_cold_brook_lake-(anaxyrus_woodhousii_NAB_2 + anaxyrus_woodhousii_cottonwood_springs_lake + anaxyrus_woodhousii_yankton_2))) %>% 
@@ -301,7 +345,10 @@ species_diff <- easy_data %>%
   mutate(pipiens_blanchardi=(rana_pipiens_lost_lake-(acris_blanchardi_yankton_1+acris_blanchardi_yankton_2))) %>% 
   mutate(blairi_woodhousii=((rana_blairi_yankton_1+rana_blairi_yankton_2)-(anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2))) %>% 
   mutate(blairi_blanchardi=((rana_blairi_yankton_1+rana_blairi_yankton_2)-(acris_blanchardi_yankton_1+acris_blanchardi_yankton_2))) %>% 
-  mutate(woodhousii_blanchardi=((anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2)-(acris_blanchardi_yankton_1+acris_blanchardi_yankton_2)))
+  mutate(woodhousii_blanchardi=((anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2)-(acris_blanchardi_yankton_1+acris_blanchardi_yankton_2))) %>% 
+  mutate(woodhousii_blairi=((anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2)-(rana_blairi_yankton_1+rana_blairi_yankton_2))) %>% 
+  mutate(woodhousii_catesbeiana=((anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2)-rana_catesbeiana_cold_brook_lake)) %>% 
+  mutate(woodhousii_pipiens=((anaxyrus_woodhousii_NAB_2+anaxyrus_woodhousii_cottonwood_springs_lake+anaxyrus_woodhousii_yankton_2)-rana_pipiens_lost_lake))
 
 #Calculating the median ranavirus copies and the 95% credible interval. There is a 95% probability that the values range from blank to blank with a median of blank.
 species_diff %>% 
@@ -322,8 +369,17 @@ species_diff %>%
   median_qi(blairi_woodhousii)
 species_diff %>% 
   median_qi(blairi_blanchardi)
+
+
+#Mean diffs
 species_diff %>% 
-  median_qi(woodhousii_blanchardi)
+  mean_qi(woodhousii_blairi)
+species_diff %>% 
+  mean_qi(woodhousii_catesbeiana)
+species_diff %>% 
+  mean_qi(woodhousii_pipiens)
+species_diff %>% 
+  mean_qi(woodhousii_blanchardi)
 
 #Calculating the probability that there is a difference between groups. Calculating the probability that the first species has a greater quantity of virus than the second species.
 species_diff %>% 
@@ -346,6 +402,12 @@ species_diff %>%
   summarize(higher=sum(blairi_blanchardi>0)/nrow(.))
 species_diff %>% 
   summarize(higher=sum(woodhousii_blanchardi>0)/nrow(.))
+species_diff %>% 
+  summarize(higher=sum(woodhousii_blairi>0)/nrow(.))
+species_diff %>% 
+  summarize(higher=sum(woodhousii_catesbeiana>0)/nrow(.))
+species_diff %>% 
+  summarize(higher=sum(woodhousii_pipiens>0)/nrow(.))
 
 #Now to calculate the differences by sampling site
 site_diff <- easy_data %>% 
@@ -431,36 +493,32 @@ site_diff %>%
 
 ```
 
-This is a model looking at viral load by life stage - might look at this more later
+This is a model looking at ranavirus prevalence based on site.
 ```{r}
-#Adding a column to my data so that developmental stage is consistent: 1 is adult 0 is juvenile
-stage_pos <- data %>% 
-  mutate(positive_status=case_when(result=="positive" ~ 1,
-                            TRUE ~ 0))%>% 
-  mutate(devel=case_when(stage=="adult" ~ 1,
-                         TRUE ~ 0)) %>% 
-  select(sample_label, site, side_of_state, species, value_1, value_2, value_3,devel) %>% 
-  group_by(sample_label) %>% 
-  mutate(average_virus=mean(c(value_1, value_2, value_3))) %>% 
-  view()
+#Adding 0.000001 to all average virus values so that I have no zero values and am able to use the Gamma distribution for my model
+newest <- prevalence_data_site %>% 
+  mutate(whole=(prevalence*100)) %>% 
+  select(site, whole)
+  
+get_prior(whole~site, data=newest, family=Gamma(link="log"))
 
-get_prior(average_virus~devel, data=stage_pos, family=Gamma)
+#model
+modmod <- brm(whole ~ site,
+                  family=Gamma(link="log"),
+                  data=newest %>% filter(whole>0),
+                  prior=c(prior(normal(-1,0.001), class="b"),
+                          prior(normal(0.1, 0.05), class="Intercept")),
+                  #sample_prior="only",
+                  iter=1000, chains=1,
+                  file="modmod.rds",
+                  file_refit="on_change")
 
-#A model based on stage
-stage_model <- brm(average_virus ~ devel,
-                   family=Gamma(link="log"),
-                   data=stage_pos %>% filter(average_virus>0.000001),
-                   prior=c(prior(normal(0,0.5), class="b")),
-                   sample_prior="only",
-                   iter=1000, chains=4,
-                   file="Models/stage_model.rds",
-                   file_refit="on_change")
+plot(conditional_effects(modmod, points=T))
 
-saveRDS(stage_model, "Models/stage_model.rds")
+modmod <- update(modmod, iter=2000, chains=4)#update chains and iterations
+modmod#call the model to view stats
 
-plot(conditional_effects(stage_model, points=T))
-
-stage_model <- update(stage_model, iter=2000, chains=4)
+saveRDS(modmod, "Models/modmod.rds")
 
 
 

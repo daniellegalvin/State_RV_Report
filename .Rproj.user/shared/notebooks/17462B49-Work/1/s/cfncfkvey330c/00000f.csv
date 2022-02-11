@@ -1,0 +1,251 @@
+"0","modmod <- brm(whole ~ site,
+                  family=Gamma(link=""log""),
+                  data=newest %>% filter(whole>0),
+                  prior=c(prior(normal(-1,0.001), class=""b""),
+                          prior(normal(0.1, 0.05), class=""Intercept"")),
+                  #sample_prior=""only"",
+                  iter=1000, chains=1,
+                  file=""modmod.rds"",
+                  file_refit=""on_change"")
+"
+"2","Compiling Stan program...
+"
+"2","Warning in system(paste(CXX, ARGS), ignore.stdout = TRUE, ignore.stderr = TRUE) :"
+"2","
+ "
+"2"," '-E' not found
+"
+"2","recompiling to avoid crashing R session
+"
+"2","Start sampling
+"
+"1","
+"
+"1",""
+"1","SAMPLING"
+"1",""
+"1"," FOR MODEL '"
+"1",""
+"1","dab295bdea242bf16c306523fe217e4c"
+"1",""
+"1","' NOW (CHAIN "
+"1",""
+"1","1"
+"1",""
+"1",").
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1",""
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Gradient evaluation took 0 seconds"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","1000 transitions using 10 leapfrog steps per transition would take 0 seconds."
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Adjust your expectations accordingly!"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1",""
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1",""
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration:   1 / 1000 [  0%]  (Warmup)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 100 / 1000 [ 10%]  (Warmup)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 200 / 1000 [ 20%]  (Warmup)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 300 / 1000 [ 30%]  (Warmup)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 400 / 1000 [ 40%]  (Warmup)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 500 / 1000 [ 50%]  (Warmup)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 501 / 1000 [ 50%]  (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 600 / 1000 [ 60%]  (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 700 / 1000 [ 70%]  (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 800 / 1000 [ 80%]  (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 900 / 1000 [ 90%]  (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","Iteration: 1000 / 1000 [100%]  (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1",""
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1"," Elapsed Time: 0.195 seconds (Warm-up)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","               0.134 seconds (Sampling)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1","               0.329 seconds (Total)"
+"1","
+"
+"1","Chain "
+"1","1"
+"1",": "
+"1",""
+"1","
+"
+"2","Warning:"
+"2"," Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+http://mc-stan.org/misc/warnings.html#bulk-ess
+"
+"0","plot(conditional_effects(modmod, points=T))"
+"2","
+"
+"2","==== C stack trace ===============================
+
+	(No symbol) [0x0x367f140]
+	R_RunWeakRefFinalizer [0x0x6c83468f+383]
+	R_RunWeakRefFinalizer [0x0x6c834927+1047]
+	Rf_eval [0x0x6c7fccda+330]
+	Rf_eval [0x0x6c7fd5c9+2617]
+	Rf_eval [0x0x6c7fda48+3768]
+	R_initAssignSymbols [0x0x6c7f2712+51010]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_apply"
+"2","Closure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_has_methods_attached [0x0x6c83c868+920]
+	R_has_methods_attached [0x0x6c83d3d4+3844]
+	R_initAssignSymbols [0x0x6c7ed42b+29787]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_apply"
+"2","Closure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_has_methods_attached [0x0x6c83c868+920]
+	R_has_methods_attached [0x0x6c83d3d4+3844]
+	R_initAssignSymbols [0x0x6c7ed42b+29787]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_apply"
+"2","Closure [0x0x6c7ffc7a+442]
+	R_has_methods_attached [0x0x6c83c868+920]
+	R_has_methods_attached [0x0x6c83d3d4+3844]
+	R_initAssignSymbols [0x0x6c7ed42b+29787]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_has_methods_attached [0x0x6c83c868+920]
+	R_has_methods_attached [0x0x6c83d3d4+3844]
+	R_initAssignSymbols [0x"
+"2","0x6c7ed42b+29787]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+	R_initAssignSymbols [0x0x6c7f5064+61588]
+	Rf_eval [0x0x6c7fcd01+369]
+	R_cmpfun1 [0x0x6c7fea17+1191]
+	Rf_applyClosure [0x0x6c7ffc7a+442]
+"
