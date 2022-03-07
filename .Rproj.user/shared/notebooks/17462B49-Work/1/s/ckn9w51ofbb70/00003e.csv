@@ -1,4 +1,0 @@
-"0",""
-"0","#Calculating the probability that there is a difference between groups. Calculating the probability that the first species has a greater quantity of virus than the second species."
-"0","species_diff %>% "
-"0","  summarize(higher=sum(catesbeiana_woodhousii>0)/nrow(.))"

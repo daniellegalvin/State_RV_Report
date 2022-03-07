@@ -1,4 +1,0 @@
-"0",""
-"0","#Calculating the probability that there is a difference between groups. Calculating the probability that the first site has a greater quantity of virus than the second site."
-"0","site_diff %>% "
-"0","  summarize(higher=sum(cold_lost>0)/nrow(.))"

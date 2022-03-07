@@ -1,2 +1,0 @@
-"0","site_diff %>% "
-"0","  summarize(higher=sum(lost_NAB>0)/nrow(.))"
