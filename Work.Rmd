@@ -22,15 +22,37 @@ data <- read_excel("2021_State_Ranavirus_Data.xlsx",
 head(data)
 
 #Adding a column to the data where positives are given a 1, negatives a 0, then selecting the necessary columns and calculating the average copies of virus per individual
-site_based_pos <- data %>% 
+# site_based_pos <- data %>% 
+#   mutate(positive_status=case_when(result=="positive" ~ 1,
+#                             TRUE ~ 0))%>% 
+#   #filter(value_1>0) %>% 
+#   select(sample_label, site, side_of_state, species, value_1, value_2, value_3, positive_status) %>% 
+#   group_by(sample_label) %>%
+#   mutate(average_virus=mean(c(value_1, value_2, value_3))) %>%
+#   mutate(singles=1) %>% 
+#   pivot_longer(cols=c(value_1, value_2, value_3),
+#                names_to="replicate",
+#                values_to="virus_copies")
+
+site_data <- data %>% 
+  mutate(positive_status=case_when(result=="positive" ~ 1)) %>% 
+  select(sample_label, site, side_of_state, species, value_1, value_2, value_3, positive_status) %>% 
+  pivot_longer(cols=c(value_1, value_2, value_3),
+               names_to="replicate",
+               values_to="virus_copies")
+
+#Doing the same as above but now incorporating development stage
+develop <- data %>% 
   mutate(positive_status=case_when(result=="positive" ~ 1,
                             TRUE ~ 0))%>% 
-  #filter(value_1>0) %>% 
-  select(sample_label, site, side_of_state, species, value_1, value_2, value_3, positive_status) %>% 
+  select(sample_label, site, side_of_state, species, stage, value_1, value_2, value_3, positive_status) %>% 
   group_by(sample_label) %>% 
-  mutate(average_virus=mean(c(value_1, value_2, value_3))) %>% 
   mutate(singles=1) %>% 
-  view()
+  pivot_longer(cols=c(value_1, value_2, value_3),
+               names_to="replicate",
+               values_to="virus_copies") %>% 
+  mutate(stage=case_when(stage=="adult"~"adult",
+                         TRUE ~ "juvenile")) 
 
 #cold_brook_prevalence <- site_based_pos %>% 
 #  filter(site=="cold_brook_lake") %>% 
@@ -139,162 +161,106 @@ total_pos <- site_based_pos %>%
   group_by(site) %>% 
   mutate(total_positive=sum(positive_status)) %>% 
   mutate(total_individuals=sum(singles)) %>% 
-  ungroup() %>% 
-  mutate(total_state=sum(positive_status)) %>% 
-  mutate(all_state=sum(singles)) %>% 
-  group_by(site) %>% 
-  mutate(site_totals=sum(singles)) %>% 
-  select(site, total_positive, site_totals)
+  ungroup()
 
 #Prevalence by site from scratch
 prev_site <- total_pos %>% 
   group_by(site) %>% 
   mutate(prevalence=((sum(positive_status)/(sum(singles)))*100))
 
-#Prevalence by species
-species_prev <- total_pos %>% 
-  group_by(species) %>% 
-  mutate(total_pos=(sum(positive_status))) %>% 
-  mutate(total_sampled=(sum(singles))) %>% 
-  mutate(species_prevalence=((sum(positive_status)/(sum(singles)))*100)) %>% 
-  select(species, total_pos, total_sampled, species_prevalence)
+#Total positive by stage
+stage_pos_total <- develop %>% 
+  group_by(stage) %>% 
+  mutate(total_pos=sum(positive_status)) %>% 
+  mutate(total_ind=sum(singles)) %>% 
+  ungroup()
+
+#Prevalence by stage from scratch
+prev_stage <- stage_pos_total %>% 
+  group_by(stage) %>% 
+  mutate(prevalence=((sum(positive_status)/(sum(singles)))*100))
+
+# #Prevalence by species
+# species_prev <- total_pos %>% 
+#   group_by(species) %>% 
+#   mutate(total_pos=(sum(positive_status))) %>% 
+#   mutate(total_sampled=(sum(singles))) %>% 
+#   mutate(species_prevalence=((sum(positive_status)/(sum(singles)))*100)) %>% 
+#   select(species, total_pos, total_sampled, species_prevalence)
 
 #Average average rv copies by species
-datadata <- total_pos %>% 
-  filter(average_virus>0) %>% 
-  group_by(species) %>% 
-  mutate(average_load=(mean(average_virus))) %>% 
-  select(species, average_load)
+# datadata <- total_pos %>% 
+#   filter(average_virus>0) %>% 
+#   group_by(species) %>% 
+#   mutate(average_load=(mean(average_virus))) %>% 
+#   select(species, average_load)
   
-
-#Calculating the prevalence values by site  
+# #Calculating the prevalence values by site
 site_name <- data.frame(site=c("cold_brook", "cottonwood_springs", "lost_lake", "NAB_2", "yankton_1", "yankton_2", "acheson", "buffalo_lake", "gold_run_creek", "habeger", "horsethief", "iron_creek_lake", "long_lake", "mitchell_lake", "pettigrew", "roubaix_lake", "sylvan_lake"))
 prevalence_rate <- data.frame(prevalence=c(0.06666667, 0.7692308, 0.625, 0.8571429,0.8235294, 0.9411765, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-prevalence_data_site <- cbind(site_name, prevalence_rate) %>% 
+prevalence_data_site <- cbind(site_name, prevalence_rate) %>%
   view()
 prevalence_data_site
+
 #The ranavirus prevalence rates are 6.67% for cold_brook, 76.92% for cottonwood_springs, 62.5% for lost_lake, 85.7% for NAB_2, 82.4% for yankton_1, and 94.1% for yankton_2
 
 #Calculating the prevalence values across the entire state
-state_wide_prevalence <- site_based_pos %>% 
-  summarize(prevalence=sum(average_virus>0)/nrow(.)) %>% 
+state_wide_prevalence <- site_based_pos %>%
+  summarize(prevalence=sum(average_virus>0)/nrow(.)) %>%
   mutate(total=sum(prevalence))
 state_wide_prevalence
 #There is a 20.8% prevalence rate of ranavirus across the state.
   
 ```
 
-Model looking just at the relationship between average copies of virus and species.
+Building a zero-inflated gamma model to evaluate the average number of ranavirus copies based on an interaction between site and species.
 ```{r}
-# #Adding 0.000001 to all average virus values so that I have no zero values and am able to use the Gamma distribution for my model
-# new_data <- site_based_pos %>% 
-#   mutate(virus=(average_virus+0.1))
-# 
-# #Getting the necessary information for my priors including coefficients and classes
-# get_prior(average_virus ~ species,
-#           family=hurdle_gamma(link="log"), data=new_data)
-# 
-# 
-# 
-# species_model <- brm(virus ~ species,
-#                   family=Gamma(link="log"),
-#                   data=new_data %>% filter(virus>0.1),
-#                   prior=c(prior(normal(0, 0.5), class="b"),
-#                          prior(normal(0.5, 2), class="Intercept")),
-#                   #sample_prior="only",
-#                   iter=1000, chains=4,
-#                   file="Models/species_model.rds",
-#                   file_refit="on_change")
-# 
-# saveRDS(species_model, "Models/species_model.rds")
-# 
-# #Look at chain convergence
-# #plot(species_model)
-# 
-# species_model
-# 
-# plot(conditional_effects(species_model, points=T))
-# 
-# cond_data <- distinct(species_model$data %>% select(-virus))
-# 
-# posts <- add_epred_draws(species_model, newdata=cond_data)
-# 
-# posts %>% 
-#   ggplot(aes(x=species, y=.epred))+
-#   geom_violin()+
-#   geom_point(data=species_model$data, aes(y=virus),
-#              position=position_dodge(width=0.9))+
-#   geom_point(data=species_model$data, aes(y=(median(virus))), color="red", shape=17, size=2.5)+
-#   geom_point(data=species_model$data, aes(y=(mean(virus))), fill="blue", shape=22, size=2.5)+
-#   scale_y_log10()+
-#   labs(y="Ranavirus Copies", x="Species", caption="Figure 1. Violin plot depicting the density of estimated ranavirus copies\n by species. Blue square represents the mean and red triangle\n represents the median")
-# 
-# 
-# #Plot median rather than mean
-# 
-# species_model$data
-# 
-# bayes_R2(species_model)
-# 
-# pp_check(species_model, type="stat_grouped", group="species")
-# 
-# 
-# 
-# species_model %>% 
-#   ggplot(aes(x=species, y=virus, color=site_name))+
-#   geom_point()
-# 
-
-```
-
-A better model looking at the relationship between average copies of virus and the interaction between species and site.
-```{r}
-#Adding 0.000001 to all average virus values so that I have no zero values and am able to use the Gamma distribution for my model
-new_data <- site_based_pos %>% 
-   mutate(virus=(average_virus+0.1))
-  
+get_prior(virus_copies ~ 1+ site*species, data=site_data, family=hurdle_gamma(link="log"))
 
 #model
-species_site_model <- brm(virus ~ 1+ site*species,
-                  family=Gamma(link="log"),
-                  data=new_data %>% filter(virus>0.1),
+species_site_model <- brm(bf(virus_copies ~ 1 + site*species,
+                             hu ~ 1 + site*species),     #This line is added to model the probability of detecting the virus, this makes the detection probability unique for each site.
+                  family=hurdle_gamma(link="log"),
+                  data=site_data,
                   prior=c(prior(normal(0, 0.5), class="b"),
-                         prior(normal(0.5, 2), class="Intercept")),
+                         prior(normal(0.3, 0.8), class="Intercept")),
                   #sample_prior="only",
-                  iter=2000, chains=4,
+                  iter=1000, chains=1,
                   file="Models/species_site_model.rds",
                   file_refit="on_change")
 
-species_site_model <- update(species_site_model, iter=2000, chains=4)#update chains and iterations
-species_site_model#call the model to view stats
-
 saveRDS(species_site_model, "Models/species_site_model.rds")
 
+species_site_model#call the model to view stats
+
 #Conditional effects plot
-plot(conditional_effects(species_site_model, points=T))
+plot(conditional_effects(species_site_model), points=T)
 
 #Data for plotting
-cond_data_site <- distinct(species_site_model$data %>% select(-virus))
-posts_site <- add_epred_draws(species_site_model, newdata=cond_data_site)
+cond_data_site <- distinct(species_site_model$data %>% select(-virus_copies))
+posts_site <- add_epred_draws(species_site_model, newdata=cond_data_site, dpar=TRUE) %>% 
+  mutate(epred_hu=.epred*hu)
+#Adding dpar=TRUE creates the column hu which contains the probability of detecting 0 ranavirus copies.
 
-#Plot looking at the average copies of ranavirus on the log scale based on species, colored by site
+#Plot looking at the copies of ranavirus on the log scale based on species, colored by site, using the corrected virus value calculated by multiplying the probability of detection by the number of virus copies.
 species_site_plot <- posts_site %>% 
-  ggplot(aes(x=site, y=.epred, fill=species))+
+  ggplot(aes(x=site, y=epred_hu, fill=species))+
   geom_violin()+
   geom_boxplot(width=0.1,aes(fill=species), position=position_dodge(width=0.9), outlier.size=0)+
-  geom_point(data=species_site_model$data, aes(y=virus),
+  geom_point(data=site_data, aes(y=virus_copies),
              position=position_dodge(width=0.9))+
 scale_y_log10()+
-  labs(y="Average Ranavirus Copies", x="Site")+
+  labs(y="Ranavirus Copies", x="Site")+
   theme(axis.text.x=element_text(size=8, angle=30, hjust=1))+
   guides(fill=guide_legend(title="Species"))
 species_site_plot
+
 ggsave("site_species_interaction_plot.jpg", plot=species_site_plot,width=6, height=4, dpi=600)
 
 #Plot looking at the average copies of ranavirus on the log scale based on species
 species_plot <- posts_site %>% 
-  ggplot(aes(x=species, y=.epred, fill=species))+
-  geom_violin(fill="species")+
+  ggplot(aes(x=species, y=epred_hu, fill=species))+
+  geom_violin()+
   geom_boxplot(width=0.1, alpha=0.6, outlier.size=0)+
   geom_point(data=species_site_model$data, aes(y=virus),
              position=position_dodge(width=0.9))+
@@ -322,6 +288,10 @@ pp_check(species_site_model, type="stat_grouped", group="species")
 pp_check(species_site_model, type="stat_grouped", group="site")
 pp_check(species_site_model, type="boxplot")
 
+```
+
+Calculating values for summary stats
+```{r}
 #Mean ranavirus copies for each species at each site
 summarize(posts_site, mean=mean(.epred))
 
@@ -535,9 +505,8 @@ site_based_diff %>%
   summarize(higher=(sum(woodhousii_blairi_yank2>0))/nrow(.))
 site_based_diff %>% 
   summarize(higher=(sum(blanchardi_woodhousii_yank2>0))/nrow(.))
-
-
 ```
+
 
 This is a model looking at ranavirus prevalence based on site.
 ```{r}
@@ -581,6 +550,25 @@ prev_site_plot
 ggsave("species_site_interaction_plot.jpg", plot=species_site_plot,width=8, height=4, dpi=600)
 
 ```
+
+Model looking at the average number of ranavirus copies based on life stage (juvenile or adult)
+```{r}
+life_data <- 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
