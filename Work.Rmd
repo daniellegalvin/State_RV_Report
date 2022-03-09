@@ -157,16 +157,16 @@ develop <- data %>%
 #   view()
 
 #Total positive individuals by site
-total_pos <- site_based_pos %>% 
-  group_by(site) %>% 
-  mutate(total_positive=sum(positive_status)) %>% 
-  mutate(total_individuals=sum(singles)) %>% 
-  ungroup()
+# total_pos <- site_data %>% 
+#   group_by(site) %>% 
+#   mutate(total_positive=sum(positive_status)) %>% 
+#   mutate(total_individuals=sum(singles)) %>% 
+#   ungroup()
 
 #Prevalence by site from scratch
-prev_site <- total_pos %>% 
-  group_by(site) %>% 
-  mutate(prevalence=((sum(positive_status)/(sum(singles)))*100))
+# prev_site <- total_pos %>% 
+#   group_by(site) %>% 
+#   mutate(prevalence=((sum(positive_status)/(sum(singles)))*100))
 
 #Total positive by stage
 stage_pos_total <- develop %>% 
@@ -222,8 +222,11 @@ species_site_model <- brm(bf(virus_copies ~ 1 + site*species,
                              hu ~ 1 + site*species),     #This line is added to model the probability of detecting the virus, this makes the detection probability unique for each site.
                   family=hurdle_gamma(link="log"),
                   data=site_data,
-                  prior=c(prior(normal(0, 0.5), class="b"),
-                         prior(normal(0.3, 0.8), class="Intercept")),
+                  prior=c(prior(normal(0.2, 0.5), class="b"),
+                         prior(normal(0.3, 0.8), class="Intercept"),
+                         prior(normal(0.5, 0.5), class="b", coef="speciesanaxyrus_woodhousii"),
+                         prior(normal(0.5, 0.5), class="b", coef="sitelost_lake"),
+                         prior(normal(0.4,0.5), class="b", coef="siteNAB_2")),
                   #sample_prior="only",
                   iter=1000, chains=1,
                   file="Models/species_site_model.rds",
@@ -262,7 +265,7 @@ species_plot <- posts_site %>%
   ggplot(aes(x=species, y=epred_hu, fill=species))+
   geom_violin()+
   geom_boxplot(width=0.1, alpha=0.6, outlier.size=0)+
-  geom_point(data=species_site_model$data, aes(y=virus),
+  geom_point(data=species_site_model$data, aes(y=virus_copies),
              position=position_dodge(width=0.9))+
   scale_y_log10()+
   labs(y="Average Ranavirus Copies", x="Species")+
@@ -275,7 +278,7 @@ site_plot <- posts_site %>%
   ggplot(aes(x=site, y=.epred))+
   geom_violin(fill='#A4A4A4')+
   geom_boxplot(width=0.1, alpha=0.6, outlier.size=0)+
-  geom_point(data=species_site_model$data, aes(y=virus),
+  geom_point(data=species_site_model$data, aes(y=virus_copies),
              position=position_dodge(width=0.9))+
   scale_y_log10()+
   labs(y="Average Ranavirus Copies", x="Site")+

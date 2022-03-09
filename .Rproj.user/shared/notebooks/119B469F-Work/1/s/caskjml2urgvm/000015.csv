@@ -1,0 +1,13 @@
+"0","#Total positive individuals by site
+total_pos <- site_data %>% 
+  group_by(site) %>% 
+  mutate(total_positive=sum(positive_status)) %>% 
+  mutate(total_individuals=sum(singles)) %>% 
+  ungroup()
+"
+"2","Error: Problem with `mutate()` column `total_individuals`.
+[34mi[39m `total_individuals = sum(singles)`.
+[31mx[39m object 'singles' not found
+[34mi[39m The error occurred in group 1: site = ""acheson"".
+[90mRun `rlang::last_error()` to see where the error occurred.[39m
+"
