@@ -6,9 +6,11 @@ output: html_document
 ---
 
 ```{r}
+library(Matrix)
+library(dbplyr)
 library(tidyverse)
-library(brms)
 library(readxl)
+library(brms)
 library(tidybayes)
 ```
 
@@ -205,10 +207,10 @@ prevalence_data_site
 #The ranavirus prevalence rates are 6.67% for cold_brook, 76.92% for cottonwood_springs, 62.5% for lost_lake, 85.7% for NAB_2, 82.4% for yankton_1, and 94.1% for yankton_2
 
 #Calculating the prevalence values across the entire state
-state_wide_prevalence <- site_based_pos %>%
-  summarize(prevalence=sum(average_virus>0)/nrow(.)) %>%
-  mutate(total=sum(prevalence))
-state_wide_prevalence
+# state_wide_prevalence <- site_based_pos %>%
+#   summarize(prevalence=sum(average_virus>0)/nrow(.)) %>%
+#   mutate(total=sum(prevalence))
+# state_wide_prevalence
 #There is a 20.8% prevalence rate of ranavirus across the state.
   
 ```
@@ -222,15 +224,15 @@ species_site_model <- brm(bf(virus_copies ~ 1 + site*species,
                              hu ~ 1 + site*species),     #This line is added to model the probability of detecting the virus, this makes the detection probability unique for each site.
                   family=hurdle_gamma(link="log"),
                   data=site_data,
-                  prior=c(prior(normal(0.2, 0.5), class="b"),
+                  prior=c(prior(normal(0.7, 0.5), class="b"),
                          prior(normal(0.3, 0.8), class="Intercept"),
-                         prior(normal(0.5, 0.5), class="b", coef="speciesanaxyrus_woodhousii"),
-                         prior(normal(0.5, 0.5), class="b", coef="sitelost_lake"),
-                         prior(normal(0.4,0.5), class="b", coef="siteNAB_2")),
-                  #sample_prior="only",
-                  iter=1000, chains=1,
-                  file="Models/species_site_model.rds",
-                  file_refit="on_change")
+                         prior(normal(2, 0.5), class="b", coef="speciesanaxyrus_woodhousii"),
+                         prior(normal(1.2, 0.5), class="b", coef="sitelost_lake"),
+                         prior(normal(2,0.5), class="b", coef="siteNAB_2")),
+                  sample_prior="only",
+                  iter=1000, chains=2)
+                  # file="Models/species_site_model.rds",
+                  # file_refit="on_change")
 
 saveRDS(species_site_model, "Models/species_site_model.rds")
 
@@ -241,13 +243,12 @@ plot(conditional_effects(species_site_model), points=T)
 
 #Data for plotting
 cond_data_site <- distinct(species_site_model$data %>% select(-virus_copies))
-posts_site <- add_epred_draws(species_site_model, newdata=cond_data_site, dpar=TRUE) %>% 
-  mutate(epred_hu=.epred*hu)
-#Adding dpar=TRUE creates the column hu which contains the probability of detecting 0 ranavirus copies.
+posts_site <- add_epred_draws(species_site_model, newdata=cond_data_site, dpar=TRUE)
+#Adding dpar=TRUE creates the column hu which contains the probability of detecting 0 ranavirus copies. The .epred column accounts for this probability.
 
 #Plot looking at the copies of ranavirus on the log scale based on species, colored by site, using the corrected virus value calculated by multiplying the probability of detection by the number of virus copies.
 species_site_plot <- posts_site %>% 
-  ggplot(aes(x=site, y=epred_hu, fill=species))+
+  ggplot(aes(x=site, y=.epred, fill=species))+
   geom_violin()+
   geom_boxplot(width=0.1,aes(fill=species), position=position_dodge(width=0.9), outlier.size=0)+
   geom_point(data=site_data, aes(y=virus_copies),
@@ -289,7 +290,6 @@ ggsave("site_plot.jpg", plot=site_plot, width=6, height=4, dpi=600)
 #posterior predictive check graphs
 pp_check(species_site_model, type="stat_grouped", group="species")
 pp_check(species_site_model, type="stat_grouped", group="site")
-pp_check(species_site_model, type="boxplot")
 
 ```
 
