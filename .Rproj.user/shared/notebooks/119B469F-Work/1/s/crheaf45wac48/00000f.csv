@@ -1,0 +1,42 @@
+"0","#Load the data"
+"0","data <- read_excel(""2021_State_Ranavirus_Data.xlsx"", "
+"0","    col_types = c(""text"", ""text"", ""text"", "
+"0","        ""text"", ""text"", ""text"", ""numeric"", "
+"0","        ""text"", ""text"", ""text"", ""numeric"", "
+"0","        ""numeric"", ""numeric"", ""skip"", ""text""))"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G4 / R4C7: got 'n_a'
+"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G5 / R5C7: got 'n_a'
+"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G6 / R6C7: got 'n_a'
+"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G7 / R7C7: got 'n_a'
+"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G8 / R8C7: got 'n_a'
+"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G17 / R17C7: got 'n_a'
+"
+"2","Warning in read_fun(path = enc2native(normalizePath(path)), sheet_i = sheet,  :"
+"2","
+ "
+"2"," Expecting numeric in G112 / R112C7: got 'n_a'
+"
+"0","head(data)"

@@ -3,9 +3,9 @@
     "path": "C:/Users/danij/Desktop/Research/Grants/Funded/2021 Season/5000_SDGFP Inventory and Monitoring 2021/State_RV_Report/Work.Rmd",
     "project_path": "Work.Rmd",
     "type": "r_markdown",
-    "hash": "4210902734",
+    "hash": "0",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1646184556524.0,
     "source_on_save": false,
     "relative_order": 1,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "237,0",
-        "scrollLine": "221"
+        "cursorPosition": "263,0",
+        "scrollLine": "244"
     },
-    "folds": "514|6|554|0|\n",
-    "lastKnownWriteTime": 1647033215,
+    "folds": "512|6|552|0|\n",
+    "lastKnownWriteTime": 1647963727,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1647033234356,
+    "last_content_update": 1647963727613,
     "read_only": false,
     "read_only_alternatives": []
 }
