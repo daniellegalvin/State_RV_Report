@@ -1,0 +1,5 @@
+"0","site_based_diff %>% 
+  summarize(higher=(sum(blanchardi_blairi_yank1>0))/nrow(.))
+"
+"0","site_based_diff %>% "
+"0","  summarize(higher=(sum(woodhousii_blairi_yank2>0))/nrow(.))"

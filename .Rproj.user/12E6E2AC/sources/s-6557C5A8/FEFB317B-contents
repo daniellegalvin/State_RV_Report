@@ -265,7 +265,7 @@ ggsave("site_species_interaction_plot.jpg", plot=species_site_plot,width=6, heig
 
 #Plot looking at the average copies of ranavirus on the log scale based on species
 species_plot <- posts_site %>% 
-  ggplot(aes(x=species, y=epred_hu, fill=species))+
+  ggplot(aes(x=species, y=.epred, fill=species))+
   geom_violin()+
   geom_boxplot(width=0.1, alpha=0.6, outlier.size=0)+
   geom_point(data=species_site_model$data, aes(y=virus_copies),
@@ -288,6 +288,10 @@ site_plot <- posts_site %>%
   theme(axis.text.x=element_text(angle=30, hjust=1))
 site_plot
 ggsave("site_plot.jpg", plot=site_plot, width=6, height=4, dpi=600)
+
+species_site_plot
+species_plot
+site_plot
 
 ```
 
