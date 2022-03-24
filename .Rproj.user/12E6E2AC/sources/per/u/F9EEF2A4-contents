@@ -1,0 +1,4 @@
+site_data %>% 
+  ggplot(aes(x = site, y = virus_copies, color = species)) + 
+  geom_jitter(width = 0.2) +
+  scale_y_log10()
