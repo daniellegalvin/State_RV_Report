@@ -1,0 +1,2 @@
+"0","site_diff %>% "
+"0","  summarize(higher=sum(cold_cottonwood>0)/nrow(.))"
